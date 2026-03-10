@@ -20,8 +20,8 @@ private:
     InterruptLine mapperIRQ;
     PPU ppu;
     RAM ram;
-    Bus bus;
     CPU6502 cpu;
+    Bus bus;
 };
 
 

@@ -6,7 +6,7 @@
 
 #include "Cartridge.h"
 
-Emulator::Emulator() : bus(ppu, ram) {
+Emulator::Emulator() : bus(ppu, ram, cpu) {
     ppu.connectBus(bus);
     cpu.connectBus(bus);
     cpu.connectNMIInterruptLine(nmiIRQ);

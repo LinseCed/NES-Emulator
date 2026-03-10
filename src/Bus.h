@@ -6,13 +6,15 @@
 #define LINES_BUS_H
 #include <cstdint>
 
+#include "CPU6502.h"
+
 class PPU;
 class RAM;
-
+class CPU6502;
 
 class Bus {
 public:
-    Bus(PPU &ppu, RAM& ram) : ppu(ppu), ram(ram) {};
+    Bus(PPU &ppu, RAM& ram, CPU6502& cpu) : ppu(ppu), ram(ram), cpu(cpu) {};
     [[nodiscard]] uint8_t read(uint16_t addr) const;
     void write(uint16_t addr, uint8_t data) const;
 
@@ -26,6 +28,7 @@ public:
 private:
     PPU& ppu;
     RAM& ram;
+    CPU6502& cpu;
     bool nmiLine = false;
 };
 

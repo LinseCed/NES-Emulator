@@ -20,6 +20,8 @@ void::Bus::write(uint16_t addr, uint8_t data) const {
     } else if (addr <= 0x3fff) {
 
     } else if (addr <= 0x4020) {
-
+        if (addr == 0x4014) {
+            cpu.startDMA(data);
+        }
     }
 }
