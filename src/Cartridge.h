@@ -5,6 +5,7 @@
 #ifndef LINES_CARTRIDGE_H
 #define LINES_CARTRIDGE_H
 #include <string>
+#include <vector>
 
 struct INESHeader {
     char name[4];
@@ -22,6 +23,8 @@ struct INESHeader {
 class Cartridge {
 public:
     explicit Cartridge(const std::string& gamePath);
+    std::vector<uint8_t> prgROM;
+    std::vector<uint8_t> chrROM;
 };
 
 
