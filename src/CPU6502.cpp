@@ -121,21 +121,22 @@ void CPU6502::execute() {
         case Operation::ADC:
         case Operation::AND:
         case Operation::ASL:
+            break;
         case Operation::BCC:
+        case Operation::BCS:
+        case Operation::BEQ:
+        case Operation::BMI:
+        case Operation::BNE:
+        case Operation::BPL:
+        case Operation::BVC:
+        case Operation::BVS:
             if (current.branchTaken) {
                 pc = current.address;
                 current.branchTaken = false;
             }
             break;
-        case Operation::BCS:
-        case Operation::BEQ:
         case Operation::BIT:
-        case Operation::BMI:
-        case Operation::BNE:
-        case Operation::BPL:
         case Operation::BRK:
-        case Operation::BVC:
-        case Operation::BVS:
         case Operation::CLC:
         case Operation::CLD:
         case Operation::CLI:
@@ -245,8 +246,27 @@ uint16_t CPU6502::getAddress(const Instruction instruction) {
             pc += 2;
             const uint16_t addr = base + x;
             current.pageCrossed = pageCrossed(base, addr);
-            if (current.pageCrossed) {
-                current.cycle++;
+            switch (current.instruction.operation) {
+                case Operation::STA:
+                case Operation::ASL:
+                case Operation::DEC:
+                case Operation::INC:
+                case Operation::LSR:
+                case Operation::ROL:
+                case Operation::ROR:
+                case Operation::SLO:
+                case Operation::RLA:
+                case Operation::SRE:
+                case Operation::RRA:
+                case Operation::DCP:
+                case Operation::ISB:
+                case Operation::SHY:
+                    break;
+                default:
+                    if (current.pageCrossed) {
+                        current.cycle++;
+                    }
+                    break;
             }
             return addr;
         }
@@ -255,8 +275,24 @@ uint16_t CPU6502::getAddress(const Instruction instruction) {
             pc += 2;
             const uint16_t addr = base + y;
             current.pageCrossed = pageCrossed(base, addr);
-            if (current.pageCrossed) {
-                current.cycle++;
+            switch (current.instruction.operation) {
+                case Operation::STA:
+                case Operation::SLO:
+                case Operation::RLA:
+                case Operation::SRE:
+                case Operation::RRA:
+                case Operation::DCP:
+                case Operation::ISB:
+                case Operation::NOP:
+                case Operation::SHX:
+                case Operation::SHA:
+                case Operation::SHS:
+                    break;
+                default:
+                    if (current.pageCrossed) {
+                        current.cycle++;
+                    }
+                    break;
             }
             return addr;
         }
@@ -280,8 +316,22 @@ uint16_t CPU6502::getAddress(const Instruction instruction) {
             const uint16_t base = bus->read(operand) | bus->read(operand + 1 & 0xFF) << 8;
             const uint16_t addr = base + y;
             current.pageCrossed = pageCrossed(base, addr);
-            if (current.pageCrossed) {
-                current.cycle++;
+            switch (current.instruction.operation) {
+                case Operation::STA:
+                case Operation::SLO:
+                case Operation::RLA:
+                case Operation::SRE:
+                case Operation::RRA:
+                case Operation::DCP:
+                case Operation::ISB:
+                case Operation::NOP:
+                case Operation::SHA:
+                    break;
+                default:
+                    if (current.pageCrossed) {
+                        current.cycle++;
+                    }
+                    break;
             }
             return addr;
         }

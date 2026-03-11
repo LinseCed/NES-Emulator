@@ -457,7 +457,7 @@ private:
         return sr & flag;
     }
 
-    void updateZN(uint8_t value) {
+    void updateZN(const uint8_t value) {
         setFlag(ZERO, value == 0);
         setFlag(NEGATIVE, value & 0x80);
     }
