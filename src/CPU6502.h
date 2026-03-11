@@ -235,15 +235,15 @@ constexpr Instruction instructions[256] = {
     Instruction{Operation::LSR, AddressMode::ABS_X, 5},        // 0x5E
     Instruction{Operation::SRE, AddressMode::ABS_X, 5},        // 0x5F
 
-    Instruction{Operation::RTS, AddressMode::IMPL, 5},          // 0x60
-    Instruction{Operation::ADC, AddressMode::IDX_IND, 5},          // 0x61
-    Instruction{Operation::JAM, AddressMode::NONE, 5},          // 0x62
-    Instruction{Operation::RRA, AddressMode::IDX_IND, 5},          // 0x63
+    Instruction{Operation::RTS, AddressMode::IMPL, 5},         // 0x60
+    Instruction{Operation::ADC, AddressMode::IDX_IND, 5},      // 0x61
+    Instruction{Operation::JAM, AddressMode::NONE, 5},         // 0x62
+    Instruction{Operation::RRA, AddressMode::IDX_IND, 5},      // 0x63
     Instruction{Operation::NOP, AddressMode::ZPG, 5},          // 0x64
     Instruction{Operation::ADC, AddressMode::ZPG, 5},          // 0x65
     Instruction{Operation::ROR, AddressMode::ZPG, 5},          // 0x66
     Instruction{Operation::RRA, AddressMode::ZPG, 5},          // 0x67
-    Instruction{Operation::PLA, AddressMode::IMPL, 5},          // 0x68
+    Instruction{Operation::PLA, AddressMode::IMPL, 5},         // 0x68
     Instruction{Operation::ADC, AddressMode::IMT, 5},          // 0x69
     Instruction{Operation::ROR, AddressMode::ACC, 5},          // 0x6A
     Instruction{Operation::ARR, AddressMode::IMT, 5},          // 0x6B
@@ -252,141 +252,141 @@ constexpr Instruction instructions[256] = {
     Instruction{Operation::ROR, AddressMode::ABS, 5},          // 0x6E
     Instruction{Operation::RRA, AddressMode::ABS, 5},          // 0x6F
 
-    Instruction{Operation::BVS, AddressMode::ZPG, 5},          // 0x70
-    Instruction{Operation::ADC, AddressMode::ZPG, 5},          // 0x71
-    Instruction{Operation::JAM, AddressMode::ZPG, 5},          // 0x72
-    Instruction{Operation::RRA, AddressMode::ZPG, 5},          // 0x73
-    Instruction{Operation::NOP, AddressMode::ZPG, 5},          // 0x74
-    Instruction{Operation::ADC, AddressMode::ZPG, 5},          // 0x75
-    Instruction{Operation::ROR, AddressMode::ZPG, 5},          // 0x76
-    Instruction{Operation::RRA, AddressMode::ZPG, 5},          // 0x77
-    Instruction{Operation::SEI, AddressMode::ZPG, 5},          // 0x78
-    Instruction{Operation::ADC, AddressMode::ZPG, 5},          // 0x79
-    Instruction{Operation::NOP, AddressMode::ZPG, 5},          // 0x7A
-    Instruction{Operation::RRA, AddressMode::ZPG, 5},          // 0x7B
-    Instruction{Operation::NOP, AddressMode::ZPG, 5},          // 0x7C
-    Instruction{Operation::ADC, AddressMode::ZPG, 5},          // 0x7D
-    Instruction{Operation::ROR, AddressMode::ZPG, 5},          // 0x7E
-    Instruction{Operation::RRA, AddressMode::ZPG, 5},          // 0x7F
+    Instruction{Operation::BVS, AddressMode::REL, 5},          // 0x70
+    Instruction{Operation::ADC, AddressMode::IND_IDX, 5},      // 0x71
+    Instruction{Operation::JAM, AddressMode::NONE, 5},         // 0x72
+    Instruction{Operation::RRA, AddressMode::IND_IDX, 5},      // 0x73
+    Instruction{Operation::NOP, AddressMode::ZPG_X, 5},        // 0x74
+    Instruction{Operation::ADC, AddressMode::ZPG_X, 5},        // 0x75
+    Instruction{Operation::ROR, AddressMode::ZPG_X, 5},        // 0x76
+    Instruction{Operation::RRA, AddressMode::ZPG_X, 5},        // 0x77
+    Instruction{Operation::SEI, AddressMode::IMPL, 5},         // 0x78
+    Instruction{Operation::ADC, AddressMode::ABS_Y, 5},        // 0x79
+    Instruction{Operation::NOP, AddressMode::IMPL, 5},         // 0x7A
+    Instruction{Operation::RRA, AddressMode::ABS_Y, 5},        // 0x7B
+    Instruction{Operation::NOP, AddressMode::ABS_X, 5},        // 0x7C
+    Instruction{Operation::ADC, AddressMode::ABS_X, 5},        // 0x7D
+    Instruction{Operation::ROR, AddressMode::ABS_X, 5},        // 0x7E
+    Instruction{Operation::RRA, AddressMode::ABS_X, 5},        // 0x7F
 
-    Instruction{Operation::NOP, AddressMode::ZPG, 5},          // 0x80
-    Instruction{Operation::STA, AddressMode::ZPG, 5},          // 0x81
-    Instruction{Operation::NOP, AddressMode::ZPG, 5},          // 0x82
-    Instruction{Operation::SAX, AddressMode::ZPG, 5},          // 0x83
+    Instruction{Operation::NOP, AddressMode::IMT, 5},          // 0x80
+    Instruction{Operation::STA, AddressMode::IDX_IND, 5},      // 0x81
+    Instruction{Operation::NOP, AddressMode::IMT, 5},          // 0x82
+    Instruction{Operation::SAX, AddressMode::IDX_IND, 5},      // 0x83
     Instruction{Operation::STY, AddressMode::ZPG, 5},          // 0x84
     Instruction{Operation::STA, AddressMode::ZPG, 5},          // 0x85
     Instruction{Operation::STX, AddressMode::ZPG, 5},          // 0x86
     Instruction{Operation::SAX, AddressMode::ZPG, 5},          // 0x87
-    Instruction{Operation::DEY, AddressMode::ZPG, 5},          // 0x88
-    Instruction{Operation::NOP, AddressMode::ZPG, 5},          // 0x89
-    Instruction{Operation::TXA, AddressMode::ZPG, 5},          // 0x8A
-    Instruction{Operation::ANE, AddressMode::ZPG, 5},          // 0x8B
-    Instruction{Operation::STY, AddressMode::ZPG, 5},          // 0x8C
-    Instruction{Operation::STA, AddressMode::ZPG, 5},          // 0x8D
-    Instruction{Operation::STX, AddressMode::ZPG, 5},          // 0x8E
-    Instruction{Operation::SAX, AddressMode::ZPG, 5},          // 0x8F
+    Instruction{Operation::DEY, AddressMode::IMPL, 5},         // 0x88
+    Instruction{Operation::NOP, AddressMode::IMT, 5},          // 0x89
+    Instruction{Operation::TXA, AddressMode::IMPL, 5},         // 0x8A
+    Instruction{Operation::ANE, AddressMode::IMT, 5},          // 0x8B
+    Instruction{Operation::STY, AddressMode::ABS, 5},          // 0x8C
+    Instruction{Operation::STA, AddressMode::ABS, 5},          // 0x8D
+    Instruction{Operation::STX, AddressMode::ABS, 5},          // 0x8E
+    Instruction{Operation::SAX, AddressMode::ABS, 5},          // 0x8F
 
-    Instruction{Operation::BCC, AddressMode::ZPG, 5},          // 0x90
-    Instruction{Operation::STA, AddressMode::ZPG, 5},          // 0x91
-    Instruction{Operation::JAM, AddressMode::ZPG, 5},          // 0x92
-    Instruction{Operation::SHA, AddressMode::ZPG, 5},          // 0x93
-    Instruction{Operation::STY, AddressMode::ZPG, 5},          // 0x94
-    Instruction{Operation::STA, AddressMode::ZPG, 5},          // 0x95
-    Instruction{Operation::STX, AddressMode::ZPG, 5},          // 0x96
-    Instruction{Operation::SAX, AddressMode::ZPG, 5},          // 0x97
-    Instruction{Operation::TYA, AddressMode::ZPG, 5},          // 0x98
-    Instruction{Operation::STA, AddressMode::ZPG, 5},          // 0x99
-    Instruction{Operation::TXS, AddressMode::ZPG, 5},          // 0x9A
-    Instruction{Operation::TAS, AddressMode::ZPG, 5},          // 0x9B
-    Instruction{Operation::SHY, AddressMode::ZPG, 5},          // 0x9C
-    Instruction{Operation::STA, AddressMode::ZPG, 5},          // 0x9D
-    Instruction{Operation::SHX, AddressMode::ZPG, 5},          // 0x9E
-    Instruction{Operation::SHA, AddressMode::ZPG, 5},          // 0x9F
+    Instruction{Operation::BCC, AddressMode::REL, 5},          // 0x90
+    Instruction{Operation::STA, AddressMode::IND_IDX, 5},      // 0x91
+    Instruction{Operation::JAM, AddressMode::NONE, 5},         // 0x92
+    Instruction{Operation::SHA, AddressMode::IND_IDX, 5},      // 0x93
+    Instruction{Operation::STY, AddressMode::ZPG_X, 5},        // 0x94
+    Instruction{Operation::STA, AddressMode::ZPG_X, 5},        // 0x95
+    Instruction{Operation::STX, AddressMode::ZPG_X, 5},        // 0x96
+    Instruction{Operation::SAX, AddressMode::ZPG_Y, 5},        // 0x97
+    Instruction{Operation::TYA, AddressMode::IMPL, 5},         // 0x98
+    Instruction{Operation::STA, AddressMode::ABS_Y, 5},        // 0x99
+    Instruction{Operation::TXS, AddressMode::IMPL, 5},         // 0x9A
+    Instruction{Operation::TAS, AddressMode::ABS_Y, 5},        // 0x9B
+    Instruction{Operation::SHY, AddressMode::ABS_X, 5},        // 0x9C
+    Instruction{Operation::STA, AddressMode::ABS_X, 5},        // 0x9D
+    Instruction{Operation::SHX, AddressMode::ABS_Y, 5},        // 0x9E
+    Instruction{Operation::SHA, AddressMode::ABS_Y, 5},        // 0x9F
 
-    Instruction{Operation::LDY, AddressMode::ZPG, 5},          // 0xA0
-    Instruction{Operation::LDA, AddressMode::ZPG, 5},          // 0xA1
-    Instruction{Operation::LDX, AddressMode::ZPG, 5},          // 0xA2
-    Instruction{Operation::LAX, AddressMode::ZPG, 5},          // 0xA3
+    Instruction{Operation::LDY, AddressMode::IMT, 5},          // 0xA0
+    Instruction{Operation::LDA, AddressMode::IDX_IND, 5},          // 0xA1
+    Instruction{Operation::LDX, AddressMode::IMT, 5},          // 0xA2
+    Instruction{Operation::LAX, AddressMode::IDX_IND, 5},          // 0xA3
     Instruction{Operation::LDY, AddressMode::ZPG, 5},          // 0xA4
     Instruction{Operation::LDA, AddressMode::ZPG, 5},          // 0xA5
     Instruction{Operation::LDX, AddressMode::ZPG, 5},          // 0xA6
     Instruction{Operation::LAX, AddressMode::ZPG, 5},          // 0xA7
-    Instruction{Operation::TAY, AddressMode::ZPG, 5},          // 0xA8
-    Instruction{Operation::LDA, AddressMode::ZPG, 5},          // 0xA9
-    Instruction{Operation::TAX, AddressMode::ZPG, 5},          // 0xAA
-    Instruction{Operation::LXA, AddressMode::ZPG, 5},          // 0xAB
-    Instruction{Operation::LDY, AddressMode::ZPG, 5},          // 0xAC
-    Instruction{Operation::LDA, AddressMode::ZPG, 5},          // 0xAD
-    Instruction{Operation::LDX, AddressMode::ZPG, 5},          // 0xAE
-    Instruction{Operation::LAX, AddressMode::ZPG, 5},          // 0xAF
+    Instruction{Operation::TAY, AddressMode::IMPL, 5},          // 0xA8
+    Instruction{Operation::LDA, AddressMode::IMT, 5},          // 0xA9
+    Instruction{Operation::TAX, AddressMode::IMPL, 5},          // 0xAA
+    Instruction{Operation::LXA, AddressMode::IMT, 5},          // 0xAB
+    Instruction{Operation::LDY, AddressMode::ABS, 5},          // 0xAC
+    Instruction{Operation::LDA, AddressMode::ABS, 5},          // 0xAD
+    Instruction{Operation::LDX, AddressMode::ABS, 5},          // 0xAE
+    Instruction{Operation::LAX, AddressMode::ABS, 5},          // 0xAF
 
-    Instruction{Operation::BCS, AddressMode::ZPG, 5},          // 0xB0
-    Instruction{Operation::LDA, AddressMode::ZPG, 5},          // 0xB1
-    Instruction{Operation::JAM, AddressMode::ZPG, 5},          // 0xB2
-    Instruction{Operation::LAX, AddressMode::ZPG, 5},          // 0xB3
-    Instruction{Operation::LDY, AddressMode::ZPG, 5},          // 0xB4
-    Instruction{Operation::LDA, AddressMode::ZPG, 5},          // 0xB5
-    Instruction{Operation::LDX, AddressMode::ZPG, 5},          // 0xB6
-    Instruction{Operation::LAX, AddressMode::ZPG, 5},          // 0xB7
-    Instruction{Operation::CLV, AddressMode::ZPG, 5},          // 0xB8
-    Instruction{Operation::LDA, AddressMode::ZPG, 5},          // 0xB9
-    Instruction{Operation::TSX, AddressMode::ZPG, 5},          // 0xBA
-    Instruction{Operation::LAS, AddressMode::ZPG, 5},          // 0xBB
-    Instruction{Operation::LDY, AddressMode::ZPG, 5},          // 0xBC
-    Instruction{Operation::LDA, AddressMode::ZPG, 5},          // 0xBD
-    Instruction{Operation::LDX, AddressMode::ZPG, 5},          // 0xBE
-    Instruction{Operation::LAX, AddressMode::ZPG, 5},          // 0xBF
+    Instruction{Operation::BCS, AddressMode::REL, 5},          // 0xB0
+    Instruction{Operation::LDA, AddressMode::IND_IDX, 5},      // 0xB1
+    Instruction{Operation::JAM, AddressMode::NONE, 5},         // 0xB2
+    Instruction{Operation::LAX, AddressMode::IND_IDX, 5},      // 0xB3
+    Instruction{Operation::LDY, AddressMode::ZPG_X, 5},        // 0xB4
+    Instruction{Operation::LDA, AddressMode::ZPG_X, 5},        // 0xB5
+    Instruction{Operation::LDX, AddressMode::ZPG_Y, 5},        // 0xB6
+    Instruction{Operation::LAX, AddressMode::ZPG_Y, 5},        // 0xB7
+    Instruction{Operation::CLV, AddressMode::IMPL, 5},         // 0xB8
+    Instruction{Operation::LDA, AddressMode::ABS_Y, 5},        // 0xB9
+    Instruction{Operation::TSX, AddressMode::IMPL, 5},         // 0xBA
+    Instruction{Operation::LAS, AddressMode::ABS_Y, 5},        // 0xBB
+    Instruction{Operation::LDY, AddressMode::ABS_X, 5},        // 0xBC
+    Instruction{Operation::LDA, AddressMode::ABS_X, 5},        // 0xBD
+    Instruction{Operation::LDX, AddressMode::ABS_Y, 5},        // 0xBE
+    Instruction{Operation::LAX, AddressMode::ABS_Y, 5},        // 0xBF
 
-    Instruction{Operation::CPY, AddressMode::ZPG, 5},          // 0xC0
-    Instruction{Operation::CMP, AddressMode::ZPG, 5},          // 0xC1
-    Instruction{Operation::NOP, AddressMode::ZPG, 5},          // 0xC2
-    Instruction{Operation::DCP, AddressMode::ZPG, 5},          // 0xC3
+    Instruction{Operation::CPY, AddressMode::IMT, 5},          // 0xC0
+    Instruction{Operation::CMP, AddressMode::IDX_IND, 5},      // 0xC1
+    Instruction{Operation::NOP, AddressMode::IMT, 5},          // 0xC2
+    Instruction{Operation::DCP, AddressMode::IDX_IND, 5},      // 0xC3
     Instruction{Operation::CPY, AddressMode::ZPG, 5},          // 0xC4
     Instruction{Operation::CMP, AddressMode::ZPG, 5},          // 0xC5
     Instruction{Operation::DEC, AddressMode::ZPG, 5},          // 0xC6
     Instruction{Operation::DCP, AddressMode::ZPG, 5},          // 0xC7
-    Instruction{Operation::INY, AddressMode::ZPG, 5},          // 0xC8
-    Instruction{Operation::CMP, AddressMode::ZPG, 5},          // 0xC9
-    Instruction{Operation::DEX, AddressMode::ZPG, 5},          // 0xCA
-    Instruction{Operation::SBX, AddressMode::ZPG, 5},          // 0xCB
-    Instruction{Operation::CPY, AddressMode::ZPG, 5},          // 0xCC
-    Instruction{Operation::CMP, AddressMode::ZPG, 5},          // 0xCD
-    Instruction{Operation::DEC, AddressMode::ZPG, 5},          // 0xCE
-    Instruction{Operation::DCP, AddressMode::ZPG, 5},          // 0xCF
+    Instruction{Operation::INY, AddressMode::IMPL, 5},         // 0xC8
+    Instruction{Operation::CMP, AddressMode::IMT, 5},          // 0xC9
+    Instruction{Operation::DEX, AddressMode::IMPL, 5},         // 0xCA
+    Instruction{Operation::SBX, AddressMode::IMT, 5},          // 0xCB
+    Instruction{Operation::CPY, AddressMode::ABS, 5},          // 0xCC
+    Instruction{Operation::CMP, AddressMode::ABS, 5},          // 0xCD
+    Instruction{Operation::DEC, AddressMode::ABS, 5},          // 0xCE
+    Instruction{Operation::DCP, AddressMode::ABS, 5},          // 0xCF
 
-    Instruction{Operation::BNE, AddressMode::ZPG, 5},          // 0xD0
-    Instruction{Operation::CMP, AddressMode::ZPG, 5},          // 0xD1
-    Instruction{Operation::JAM, AddressMode::ZPG, 5},          // 0xD2
-    Instruction{Operation::DCP, AddressMode::ZPG, 5},          // 0xD3
-    Instruction{Operation::NOP, AddressMode::ZPG, 5},          // 0xD4
-    Instruction{Operation::CMP, AddressMode::ZPG, 5},          // 0xD5
-    Instruction{Operation::DEC, AddressMode::ZPG, 5},          // 0xD6
-    Instruction{Operation::DCP, AddressMode::ZPG, 5},          // 0xD7
-    Instruction{Operation::CLD, AddressMode::ZPG, 5},          // 0xD8
-    Instruction{Operation::CMP, AddressMode::ZPG, 5},          // 0xD9
-    Instruction{Operation::NOP, AddressMode::ZPG, 5},          // 0xDA
-    Instruction{Operation::DCP, AddressMode::ZPG, 5},          // 0xDB
-    Instruction{Operation::NOP, AddressMode::ZPG, 5},          // 0xDC
-    Instruction{Operation::CMP, AddressMode::ZPG, 5},          // 0xDD
-    Instruction{Operation::DEC, AddressMode::ZPG, 5},          // 0xDE
-    Instruction{Operation::DCP, AddressMode::ZPG, 5},          // 0xDF
+    Instruction{Operation::BNE, AddressMode::REL, 5},          // 0xD0
+    Instruction{Operation::CMP, AddressMode::IND_IDX, 5},      // 0xD1
+    Instruction{Operation::JAM, AddressMode::NONE, 5},         // 0xD2
+    Instruction{Operation::DCP, AddressMode::IND_IDX, 5},      // 0xD3
+    Instruction{Operation::NOP, AddressMode::ZPG_X, 5},        // 0xD4
+    Instruction{Operation::CMP, AddressMode::ZPG_X, 5},        // 0xD5
+    Instruction{Operation::DEC, AddressMode::ZPG_X, 5},        // 0xD6
+    Instruction{Operation::DCP, AddressMode::ZPG_X, 5},        // 0xD7
+    Instruction{Operation::CLD, AddressMode::IMPL, 5},         // 0xD8
+    Instruction{Operation::CMP, AddressMode::ABS_Y, 5},        // 0xD9
+    Instruction{Operation::NOP, AddressMode::IMPL, 5},         // 0xDA
+    Instruction{Operation::DCP, AddressMode::ABS_Y, 5},        // 0xDB
+    Instruction{Operation::NOP, AddressMode::ABS_X, 5},        // 0xDC
+    Instruction{Operation::CMP, AddressMode::ABS_X, 5},        // 0xDD
+    Instruction{Operation::DEC, AddressMode::ABS_X, 5},        // 0xDE
+    Instruction{Operation::DCP, AddressMode::ABS_X, 5},        // 0xDF
 
     Instruction{Operation::CPX, AddressMode::IMT, 5},          // 0xE0
-    Instruction{Operation::SBC, AddressMode::IDX_IND, 5},          // 0xE1
-    Instruction{Operation::NOP, AddressMode::ZPG, 5},          // 0xE2
-    Instruction{Operation::ISC, AddressMode::ZPG, 5},          // 0xE3
+    Instruction{Operation::SBC, AddressMode::IDX_IND, 5},      // 0xE1
+    Instruction{Operation::NOP, AddressMode::IMT, 5},          // 0xE2
+    Instruction{Operation::ISC, AddressMode::IDX_IND, 5},      // 0xE3
     Instruction{Operation::CPX, AddressMode::ZPG, 5},          // 0xE4
     Instruction{Operation::SBC, AddressMode::ZPG, 5},          // 0xE5
     Instruction{Operation::INC, AddressMode::ZPG, 5},          // 0xE6
     Instruction{Operation::ISC, AddressMode::ZPG, 5},          // 0xE7
-    Instruction{Operation::INX, AddressMode::ZPG, 5},          // 0xE8
-    Instruction{Operation::SBC, AddressMode::ZPG, 5},          // 0xE9
-    Instruction{Operation::NOP, AddressMode::ZPG, 5},          // 0xEA
-    Instruction{Operation::USBC, AddressMode::ZPG, 5},         // 0xEB
-    Instruction{Operation::CPX, AddressMode::ZPG, 5},          // 0xEC
-    Instruction{Operation::SBC, AddressMode::ZPG, 5},          // 0xED
-    Instruction{Operation::INC, AddressMode::ZPG, 5},          // 0xEE
-    Instruction{Operation::ISC, AddressMode::ZPG, 5},          // 0xEF
+    Instruction{Operation::INX, AddressMode::IMPL, 5},         // 0xE8
+    Instruction{Operation::SBC, AddressMode::IMT, 5},          // 0xE9
+    Instruction{Operation::NOP, AddressMode::IMPL, 5},         // 0xEA
+    Instruction{Operation::USBC, AddressMode::IMT, 5},         // 0xEB
+    Instruction{Operation::CPX, AddressMode::ABS, 5},          // 0xEC
+    Instruction{Operation::SBC, AddressMode::ABS, 5},          // 0xED
+    Instruction{Operation::INC, AddressMode::ABS, 5},          // 0xEE
+    Instruction{Operation::ISC, AddressMode::ABS, 5},          // 0xEF
 
     Instruction{Operation::BEQ, AddressMode::REL, 5},          // 0xF0
     Instruction{Operation::SBC, AddressMode::IND_IDX, 5},      // 0xF1
