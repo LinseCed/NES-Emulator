@@ -49,44 +49,84 @@ void CPU6502::push(uint8_t value) {
     bus->write(STACK_START + sp--, value);
 }
 
-uint16_t CPU6502::readAddress(uint16_t addr) const {
+uint16_t CPU6502::readAddress(const uint16_t addr) const {
     const uint16_t lo = bus->read(addr);
     const uint16_t hi = bus->read(addr + 1);
     return (hi << 8) | lo;
 }
 
-void CPU6502::branch(uint8_t mask, uint8_t predicate) {
+void CPU6502::branch(const uint8_t mask, const uint8_t predicate) {
     if ((sr & mask) == predicate) {
-
+        if (current.pageCrossed) {
+            current.cycle++;
+        }
+        current.cycle++;
+        current.branchTaken = true;
+    } else {
+        current.branchTaken = false;
     }
 }
 
 void CPU6502::prepareBranch() {
-
+    switch (current.instruction.operation) {
+        case Operation::BCC:
+            branch(CARRY, 0);
+            break;
+        case Operation::BCS:
+            branch(CARRY, 1);
+            break;
+        case Operation::BEQ:
+            branch(ZERO, 1);
+            break;
+        case Operation::BMI:
+            branch(NEGATIVE, 1);
+            break;
+        case Operation::BNE:
+            branch(ZERO, 0);
+            break;
+        case Operation::BPL:
+            branch(NEGATIVE, 0);
+            break;
+        case Operation::BVC:
+            branch(OVERFLOW, 0);
+            break;
+        case Operation::BVS:
+            branch(OVERFLOW, 1);
+            break;
+        default:
+            current.branchTaken = false;
+    }
 }
 
+bool CPU6502::pageCrossed(const uint16_t base, const uint16_t addr) {
+    return (base & 0xFF00) != (addr & 0xFF00);
+}
 
 void CPU6502::execute() {
     oddCycle ^= 1;
-    if (instructionCycle == 0) {
+    if (current.cycle == 0) {
         const uint8_t opcode = bus->read(pc++);
-        currentInstruction = instructions[opcode];
-        currentAddress = getAddress(currentInstruction);
+        current.instruction = instructions[opcode];
+        current.pageCrossed = false;
+        current.address = getAddress(current.instruction);
+        current.cycle = current.instruction.cycles;
         prepareBranch();
     }
 
-    if (instructionCycle == 1) {
-        instructionCycle--;
-    } else {
-        instructionCycle--;
+    if (--current.cycle > 0) {
         return;
     }
 
-    switch (currentInstruction.operation) {
+    switch (current.instruction.operation) {
         case Operation::ADC:
         case Operation::AND:
         case Operation::ASL:
         case Operation::BCC:
+            if (current.branchTaken) {
+                pc = current.address;
+                current.branchTaken = false;
+            }
+            break;
         case Operation::BCS:
         case Operation::BEQ:
         case Operation::BIT:
@@ -113,7 +153,7 @@ void CPU6502::execute() {
         case Operation::JMP:
         case Operation::JSR:
         case Operation::LDA:
-            a = readAddress(currentAddress);
+            a = bus->read(current.address);
             updateZN(a);
             break;
         case Operation::LDX:
@@ -173,23 +213,92 @@ void CPU6502::execute() {
     }
 }
 
-uint16_t CPU6502::getAddress(Instruction instruction) const {
-    AddressMode mode = instruction.mode;
-    switch (mode) {
+uint16_t CPU6502::getAddress(const Instruction instruction) {
+    switch (instruction.mode) {
         case AddressMode::NONE:
-            return 0;
         case AddressMode::ACC:
         case AddressMode::IMPL:
+            return 0;
         case AddressMode::IMT:
-        case AddressMode::ZPG:
-        case AddressMode::ZPG_X:
-        case AddressMode::ZPG_Y:
-        case AddressMode::ABS:
-        case AddressMode::ABS_X:
-        case AddressMode::ABS_Y:
-        case AddressMode::REL:
-        case AddressMode::IDX_IND:
-        case AddressMode::IND_IDX:
+            return pc++;
+        case AddressMode::ZPG: {
+            const uint8_t operand = bus->read(pc++);
+            return operand;
+        }
+        case AddressMode::ZPG_X: {
+            const uint8_t operand = bus->read(pc++);
+            const uint8_t addr = (operand + x) & 0xFF;
+            return addr;
+        }
+        case AddressMode::ZPG_Y: {
+            const uint8_t operand = bus->read(pc++);
+            const uint8_t addr = (operand + y) & 0xFF;
+            return addr;
+        }
+        case AddressMode::ABS: {
+            const uint16_t addr = readAddress(pc);
+            pc += 2;
+            return addr;
+        }
+        case AddressMode::ABS_X: {
+            const uint16_t base = readAddress(pc);
+            pc += 2;
+            const uint16_t addr = base + x;
+            current.pageCrossed = pageCrossed(base, addr);
+            if (current.pageCrossed) {
+                current.cycle++;
+            }
+            return addr;
+        }
+        case AddressMode::ABS_Y: {
+            const uint16_t base = readAddress(pc);
+            pc += 2;
+            const uint16_t addr = base + y;
+            current.pageCrossed = pageCrossed(base, addr);
+            if (current.pageCrossed) {
+                current.cycle++;
+            }
+            return addr;
+        }
+        case AddressMode::REL: {
+            const auto offset = static_cast<int8_t>(bus->read(pc++));
+            const uint16_t addr = pc + offset;
+            current.pageCrossed = pageCrossed(pc, addr);
+            if (current.pageCrossed) {
+                current.cycle++;
+            }
+            return addr;
+        }
+        case AddressMode::IDX_IND: {
+            const uint8_t operand = bus->read(pc++);
+            const uint8_t zp = (operand + x) & 0xFF;
+            const uint16_t addr = bus->read(zp) | bus->read(zp + 1 & 0xFF) << 8;
+            return addr;
+        }
+        case AddressMode::IND_IDX: {
+            const uint8_t operand = bus->read(pc++);
+            const uint16_t base = bus->read(operand) | bus->read(operand + 1 & 0xFF) << 8;
+            const uint16_t addr = base + y;
+            current.pageCrossed = pageCrossed(base, addr);
+            if (current.pageCrossed) {
+                current.cycle++;
+            }
+            return addr;
+        }
+        case AddressMode::IND: {
+            const uint16_t loByte = bus->read(pc++);
+            const uint16_t hiByte = bus->read(pc++);
+            const uint16_t pointer = loByte | hiByte << 8;
+            uint8_t lo = bus->read(pointer);
+            uint8_t hi;
+            if ((pointer & 0xFF) == 0xFF) {
+                hi = bus->read(pointer & 0xFF00);
+            } else {
+                hi = bus->read(pointer + 1);
+            }
+            const uint16_t addr = hi << 8 | lo;
+            return addr;
+        }
         default:
             throw std::runtime_error("Unknown address mode");
     }
