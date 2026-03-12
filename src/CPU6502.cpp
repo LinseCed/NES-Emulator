@@ -7,22 +7,20 @@
 #include <stdexcept>
 
 #include "Bus.h"
+#include <iostream>
+#include <iomanip>
+#include <string>
 
 void CPU6502::connectBus(Bus& b) {
     this->bus = &b;
 }
 
 void CPU6502::connectNMIInterruptLine(InterruptLine& nmi) {
-    nmiIRQ = &nmi;
+    nmiInterruptLine = &nmi;
 }
 
-void CPU6502::connectAPUInterruptLine(InterruptLine& apu) {
-    apuIRQ = &apu;
-}
-
-
-void CPU6502::connectMapperInterruptLine(InterruptLine& mapper) {
-    mapperIRQ = &mapper;
+void CPU6502::connectIRQ(InterruptLine& irq) {
+    IRQ = &irq;
 }
 
 void CPU6502::startDMA(uint8_t) {
@@ -30,14 +28,17 @@ void CPU6502::startDMA(uint8_t) {
 }
 
 void CPU6502::reset() {
-    pc = readAddress(0xfffc);
+    pc = readAddress(0xFFFC);
     sp = 0xfd;
     sr = 0x34;
     a = x = y = 0;
 }
 
 void CPU6502::pollInterrupts() {
-
+    if (nmiInterruptLine->consumeRisingEdge()) {
+        nmiPending = true;
+    }
+    irqPending = IRQ->get();
 }
 
 
@@ -102,9 +103,50 @@ bool CPU6502::pageCrossed(const uint16_t base, const uint16_t addr) {
     return (base & 0xFF00) != (addr & 0xFF00);
 }
 
+void CPU6502::handleInterrupt(uint16_t vector, bool setBreakFlag) {
+    push(pc >> 8 & 0xFF);
+    push(pc & 0xFF);
+
+    uint8_t pushed = sr | 0x20;
+    if (setBreakFlag) {
+        pushed |= BREAK;
+    } else {
+        pushed &= ~BREAK;
+    }
+
+    push(pushed);
+
+    sr |= INTERRUPT_DISABLED;
+
+    pc = readAddress(vector);
+}
+
+
+void CPU6502::handleBRK() {
+    pc++;
+    uint16_t vector = 0xFFFE;
+
+    if (nmiPending) {
+        vector = 0xFFFA;
+        nmiPending = false;
+    }
+
+    handleInterrupt(vector, true);
+}
+
 void CPU6502::execute() {
     oddCycle ^= 1;
+
+    pollInterrupts();
+
     if (current.cycle == 0) {
+        if (nmiPending) {
+            handleInterrupt(0xFFFA, false);
+            nmiPending = false;
+        } else if (irqPending && !(sr & INTERRUPT_DISABLED)) {
+            handleInterrupt(0xFFFE, false);
+            irqPending = false;
+        }
         const uint8_t opcode = bus->read(pc++);
         current.instruction = instructions[opcode];
         current.pageCrossed = false;
@@ -122,6 +164,8 @@ void CPU6502::execute() {
         case Operation::AND:
         case Operation::ASL:
             break;
+
+        // Branching
         case Operation::BCC:
         case Operation::BCS:
         case Operation::BEQ:
@@ -135,8 +179,12 @@ void CPU6502::execute() {
                 current.branchTaken = false;
             }
             break;
+
         case Operation::BIT:
+            break;
         case Operation::BRK:
+            handleBRK();
+            break;
         case Operation::CLC:
         case Operation::CLD:
         case Operation::CLI:
@@ -153,12 +201,30 @@ void CPU6502::execute() {
         case Operation::INY:
         case Operation::JMP:
         case Operation::JSR:
+
+        // Register Load And Store
         case Operation::LDA:
             a = bus->read(current.address);
             updateZN(a);
             break;
         case Operation::LDX:
+            x = bus->read(current.address);
+            updateZN(x);
+            break;
         case Operation::LDY:
+            y = bus->read(current.address);
+            updateZN(y);
+            break;
+        case Operation::STA:
+            bus->write(current.address, a);
+            break;
+        case Operation::STX:
+            bus->write(current.address, x);
+            break;
+        case Operation::STY:
+            bus->write(current.address, y);
+            break;
+
         case Operation::LSR:
         case Operation::NOP:
         case Operation::ORA:
@@ -174,9 +240,6 @@ void CPU6502::execute() {
         case Operation::SEC:
         case Operation::SED:
         case Operation::SEI:
-        case Operation::STA:
-        case Operation::STX:
-        case Operation::STY:
         case Operation::TAX:
         case Operation::TAY:
         case Operation::TSX:
@@ -209,9 +272,11 @@ void CPU6502::execute() {
         case Operation::SBX:
         case Operation::ISC:
         case Operation::USBC:
+            break;
         default:
             throw std::runtime_error("Unknown opcode");
     }
+    printCPUState(pc, a, x, y, sp, sr, current);
 }
 
 uint16_t CPU6502::getAddress(const Instruction instruction) {
@@ -352,4 +417,67 @@ uint16_t CPU6502::getAddress(const Instruction instruction) {
         default:
             throw std::runtime_error("Unknown address mode");
     }
+}
+
+// Helper to get string names from enums
+std::string operationToString(Operation op) {
+    switch (op) {
+        case Operation::ADC: return "ADC"; case Operation::AND: return "AND"; case Operation::ASL: return "ASL";
+        case Operation::BCC: return "BCC"; case Operation::BCS: return "BCS"; case Operation::BEQ: return "BEQ";
+        case Operation::BIT: return "BIT"; case Operation::BMI: return "BMI"; case Operation::BNE: return "BNE";
+        case Operation::BPL: return "BPL"; case Operation::BRK: return "BRK"; case Operation::BVC: return "BVC";
+        case Operation::BVS: return "BVS"; case Operation::CLC: return "CLC"; case Operation::CLD: return "CLD";
+        case Operation::CLI: return "CLI"; case Operation::CLV: return "CLV"; case Operation::CMP: return "CMP";
+        case Operation::CPX: return "CPX"; case Operation::CPY: return "CPY"; case Operation::DEC: return "DEC";
+        case Operation::DEX: return "DEX"; case Operation::DEY: return "DEY"; case Operation::EOR: return "EOR";
+        case Operation::INC: return "INC"; case Operation::INX: return "INX"; case Operation::INY: return "INY";
+        case Operation::JMP: return "JMP"; case Operation::JSR: return "JSR"; case Operation::LDA: return "LDA";
+        case Operation::LDX: return "LDX"; case Operation::LDY: return "LDY"; case Operation::LSR: return "LSR";
+        case Operation::NOP: return "NOP"; case Operation::ORA: return "ORA"; case Operation::PHA: return "PHA";
+        case Operation::PHP: return "PHP"; case Operation::PLA: return "PLA"; case Operation::PLP: return "PLP";
+        case Operation::ROL: return "ROL"; case Operation::ROR: return "ROR"; case Operation::RTI: return "RTI";
+        case Operation::RTS: return "RTS"; case Operation::SBC: return "SBC"; case Operation::SEC: return "SEC";
+        case Operation::SED: return "SED"; case Operation::SEI: return "SEI"; case Operation::STA: return "STA";
+        case Operation::STX: return "STX"; case Operation::STY: return "STY"; case Operation::TAX: return "TAX";
+        case Operation::TAY: return "TAY"; case Operation::TSX: return "TSX"; case Operation::TXA: return "TXA";
+        case Operation::TXS: return "TXS"; case Operation::TYA: return "TYA";
+        // For unofficial instructions just print name as hex
+        default: return "UNK";
+    }
+}
+
+std::string addressModeToString(AddressMode mode) {
+    switch (mode) {
+        case AddressMode::NONE: return "NONE"; case AddressMode::ACC: return "ACC"; case AddressMode::IMPL: return "IMPL";
+        case AddressMode::IMT: return "IMM"; case AddressMode::ZPG: return "ZPG"; case AddressMode::ZPG_X: return "ZPG,X";
+        case AddressMode::ZPG_Y: return "ZPG,Y"; case AddressMode::ABS: return "ABS"; case AddressMode::ABS_X: return "ABS,X";
+        case AddressMode::ABS_Y: return "ABS,Y"; case AddressMode::REL: return "REL"; case AddressMode::IDX_IND: return "(IND,X)";
+        case AddressMode::IND_IDX: return "(IND),Y"; case AddressMode::IND: return "IND";
+        default: return "UNK";
+    }
+}
+
+// The print function
+void printCPUState(uint16_t pc, uint8_t a, uint8_t x, uint8_t y, uint8_t sp, uint8_t sr, InstructionState instrState) {
+    // Move cursor to top-left of console (or wherever your block starts)
+    std::cout << "\033[3F"; // Move cursor up 3 lines
+    std::cout << "\033[J";  // Clear from cursor down
+
+    std::cout << "CPU STATE\n";
+    std::cout << "PC: $" << std::hex << std::setw(4) << std::setfill('0') << pc
+              << "  A: $" << std::setw(2) << +a
+              << "  X: $" << std::setw(2) << +x
+              << "  Y: $" << std::setw(2) << +y
+              << "  SP: $" << std::setw(2) << +sp
+              << "  SR: $" << std::setw(2) << +sr << "\n";
+
+    // Print instruction state
+    std::cout << "INSTR: " << operationToString(instrState.instruction.operation)
+              << "  MODE: " << addressModeToString(instrState.instruction.mode)
+              << "  ADDR: $" << std::setw(4) << instrState.address
+              << "  CYCLE: " << +instrState.cycle
+              << "  BRANCH: " << (instrState.branchTaken ? "T" : "F")
+              << "  PAGE: " << (instrState.pageCrossed ? "Y" : "N") << "\n";
+
+    std::cout.flush();
 }

@@ -4,28 +4,37 @@
 
 #include "Emulator.h"
 
-#include <iomanip>
-#include <iostream>
+#include <thread>
 
 #include "Cartridge.h"
 
-Emulator::Emulator() : bus(ppu, ram, cpu) {
+Emulator::Emulator() : ppu(nmiIRQ), bus(ppu, ram, cpu) {
     ppu.connectBus(bus);
     cpu.connectBus(bus);
     cpu.connectNMIInterruptLine(nmiIRQ);
-    cpu.connectAPUInterruptLine(apuIRQ);
-    cpu.connectMapperInterruptLine(mapperIRQ);
+    cpu.connectIRQ(IRQ);
     Cartridge cartridge("SMB.nes");
     bus.connectCartridge(cartridge);
-    uint16_t counter = 0x8000;
-    for (const uint8_t byte : cartridge.prgROM) {
-        std::cout << "0x"
-                  << std::hex               // switch to hex
-                  << std::setw(2)          // width of 2 characters
-                  << std::setfill('0')     // pad with 0 if needed
-                  << static_cast<int>(bus.read(counter++))
-                  << " ";
+
+
+    using clock = std::chrono::high_resolution_clock;
+    constexpr auto frameTime = std::chrono::milliseconds(16);
+    while (true) {
+        auto frameStart = clock::now();
+        int cyclesThisFrame = 0;
+        int cyclesPerFrame = CYCLES_PER_SECOND / FRAMES_PER_SECOND;
+        while (cyclesThisFrame < cyclesPerFrame) {
+            cpu.execute();
+            ppu.execute();
+            ppu.execute();
+            ppu.execute();
+            cyclesThisFrame++;
+        }
+
+        auto frameEnd = clock::now();
+        if (auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(frameEnd - frameStart);
+            elapsed < frameTime) {
+            std::this_thread::sleep_for(frameTime - elapsed);
+        }
     }
-    std::cout << std::dec << std::endl; // switch back to decimal
-    cpu.execute();
 }

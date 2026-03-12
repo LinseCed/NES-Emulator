@@ -9,14 +9,15 @@
 #include "InterruptLine.h"
 #include "PPU.h"
 #include "RAM.h"
-
+#define CYCLES_PER_SECOND 1789773
+#define FRAMES_PER_SECOND 60
 
 class Emulator {
 public:
     Emulator();
 private:
     InterruptLine nmiIRQ;
-    InterruptLine apuIRQ;
+    InterruptLine IRQ;
     InterruptLine mapperIRQ;
     PPU ppu;
     RAM ram;

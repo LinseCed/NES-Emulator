@@ -4,16 +4,20 @@
 
 #include "Bus.h"
 
+#include <iostream>
+
+#include "PPU.h"
 #include "RAM.h"
 
 
-uint8_t Bus::read(uint16_t addr) const {
+uint8_t Bus::read(const uint16_t addr) const {
     if (addr <= 0x1fff) {
         return ram.read(addr);
     }
-
     if (addr >= 0x2000 && addr <= 0x3fff) {
-
+        if (addr == 0x2002) {
+            return ppu.readStatus();
+        }
     }
 
     if (addr >= 0x4000 && addr <= 0x4017) {

@@ -15,7 +15,7 @@ class Bus;
 enum StatusFlag : uint8_t {
     CARRY = 1,
     ZERO = 1 << 1,
-    INTERRUPT = 1 << 2,
+    INTERRUPT_DISABLED = 1 << 2,
     DECIMAL = 1 << 3,
     BREAK = 1 << 4,
     CPU_OVERFLOW = 1 << 6,
@@ -304,19 +304,19 @@ constexpr Instruction instructions[256] = {
     Instruction{Operation::SHA, AddressMode::ABS_Y, 5},        // 0x9F
 
     Instruction{Operation::LDY, AddressMode::IMT, 5},          // 0xA0
-    Instruction{Operation::LDA, AddressMode::IDX_IND, 5},          // 0xA1
+    Instruction{Operation::LDA, AddressMode::IDX_IND, 5},      // 0xA1
     Instruction{Operation::LDX, AddressMode::IMT, 5},          // 0xA2
-    Instruction{Operation::LAX, AddressMode::IDX_IND, 5},          // 0xA3
+    Instruction{Operation::LAX, AddressMode::IDX_IND, 5},      // 0xA3
     Instruction{Operation::LDY, AddressMode::ZPG, 5},          // 0xA4
     Instruction{Operation::LDA, AddressMode::ZPG, 5},          // 0xA5
     Instruction{Operation::LDX, AddressMode::ZPG, 5},          // 0xA6
     Instruction{Operation::LAX, AddressMode::ZPG, 5},          // 0xA7
-    Instruction{Operation::TAY, AddressMode::IMPL, 5},          // 0xA8
+    Instruction{Operation::TAY, AddressMode::IMPL, 5},         // 0xA8
     Instruction{Operation::LDA, AddressMode::IMT, 5},          // 0xA9
-    Instruction{Operation::TAX, AddressMode::IMPL, 5},          // 0xAA
+    Instruction{Operation::TAX, AddressMode::IMPL, 5},         // 0xAA
     Instruction{Operation::LXA, AddressMode::IMT, 5},          // 0xAB
     Instruction{Operation::LDY, AddressMode::ABS, 5},          // 0xAC
-    Instruction{Operation::LDA, AddressMode::ABS, 5},          // 0xAD
+    Instruction{Operation::LDA, AddressMode::ABS, 4},          // 0xAD
     Instruction{Operation::LDX, AddressMode::ABS, 5},          // 0xAE
     Instruction{Operation::LAX, AddressMode::ABS, 5},          // 0xAF
 
@@ -417,8 +417,7 @@ struct InstructionState {
 class CPU6502 {
 public:
     void connectNMIInterruptLine(InterruptLine&);
-    void connectAPUInterruptLine(InterruptLine&);
-    void connectMapperInterruptLine(InterruptLine&);
+    void connectIRQ(InterruptLine&);
     void connectBus(Bus& b);
     void startDMA(uint8_t);
     void execute();
@@ -430,21 +429,23 @@ private:
     void branch(uint8_t mask, uint8_t predicate);
     void reset();
     void prepareBranch();
+    void handleInterrupt(uint16_t vector, bool setBreakFlag);
+    void handleBRK();
     static bool pageCrossed(uint16_t base, uint16_t addr) ;
     [[nodiscard]] uint16_t getAddress(Instruction instruction);
     InstructionState current;
     uint8_t a = 0;
     uint8_t x = 0;
     uint8_t y = 0;
-    uint16_t pc = 0;
+    uint16_t pc = 0x8000;
     uint8_t sp = 0xfd;
     uint8_t sr = 0x34;
     bool oddCycle = false;
     Bus* bus = nullptr;
-    InterruptLine* nmiIRQ = nullptr;
-    InterruptLine* apuIRQ = nullptr;
-    InterruptLine* mapperIRQ = nullptr;
-
+    InterruptLine* nmiInterruptLine = nullptr;
+    InterruptLine* IRQ = nullptr;
+    bool nmiPending = false;
+    bool irqPending = false;
     void setFlag(const StatusFlag flag, const bool value) {
         if (value) {
             sr |= flag;
@@ -464,5 +465,5 @@ private:
 
 };
 
-
+void printCPUState(uint16_t pc, uint8_t a, uint8_t x, uint8_t y, uint8_t sp, uint8_t sr, InstructionState);
 #endif //LINES_CPU6502_H
