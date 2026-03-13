@@ -17,8 +17,12 @@ public:
         this->bus = &b;
     }
     uint8_t readStatus();
-    void execute();
+    bool execute();
+    void writeCtrl(uint8_t c);
+    void writeMask(uint8_t m);
+    void writeOAMAddr(uint8_t a);
 private:
+    bool firstWrite = true;
     uint8_t vram[0x4000] = {};
     uint8_t status = 0;
     uint8_t ctrl = 0;
@@ -28,6 +32,7 @@ private:
     uint16_t cycle = 0;
     Bus* bus = nullptr;
     InterruptLine& nmiIRQ;
+    uint16_t oamAddr = 0;
 };
 
 

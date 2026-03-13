@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 4.0)
 project(Lines)
 
 set(CMAKE_CXX_STANDARD 20)
+add_subdirectory(external/glfw-3.4)
 
 add_executable(Lines src/main.cpp
         src/Emulator.cpp
@@ -17,5 +18,15 @@ add_executable(Lines src/main.cpp
         src/Cartridge.cpp
         src/Cartridge.h
         src/InterruptLine.h
-        src/Util/Util.h
+        src/Renderer.cpp
+        src/Renderer.h
+        src/Window.cpp
+        src/Window.h
+        external/glad/include/KHR/khrplatform.h
+        external/glad/include/glad/gl.h
+        external/glad/src/gl.c
 )
+
+target_include_directories(Lines PRIVATE external/glad/include)
+target_include_directories(Lines PRIVATE external/glfw-3.4/include)
+target_link_libraries(Lines glfw)
