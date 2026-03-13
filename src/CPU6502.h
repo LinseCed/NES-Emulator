@@ -18,6 +18,7 @@ enum StatusFlag : uint8_t {
     INTERRUPT_DISABLED = 1 << 2,
     DECIMAL = 1 << 3,
     BREAK = 1 << 4,
+    UNUSED = 1 << 5,
     CPU_OVERFLOW = 1 << 6,
     NEGATIVE = 1 << 7,
 };
@@ -431,6 +432,10 @@ private:
     void prepareBranch();
     void handleInterrupt(uint16_t vector, bool setBreakFlag);
     void handleBRK();
+    void shiftL(uint8_t& m);
+    void shiftR(uint8_t& m);
+    void rotateLeft(uint8_t& m);
+    void rotateRight(uint8_t& m);
     static bool pageCrossed(uint16_t base, uint16_t addr) ;
     [[nodiscard]] uint16_t getAddress(Instruction instruction);
     InstructionState current;

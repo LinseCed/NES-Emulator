@@ -134,6 +134,41 @@ void CPU6502::handleBRK() {
     handleInterrupt(vector, true);
 }
 
+void CPU6502::shiftL(uint8_t& m) {
+    sr &= ~CARRY;
+    sr |= (m & 0x80) ? CARRY : 0;
+    m <<= 1;
+    updateZN(m);
+}
+
+void CPU6502::shiftR(uint8_t& m) {
+    sr &= ~CARRY;
+    sr |= (m & 0x01) ? CARRY : 0;
+    m >>= 1;
+    updateZN(m);
+}
+
+void CPU6502::rotateLeft(uint8_t& m) {
+    uint8_t rotated = m;
+    const bool carry = sr & CARRY;
+    sr &= ~CARRY;
+    sr |= (rotated & 0x80) ? CARRY : 0;
+    rotated = (rotated << 1) | (carry ? 1 : 0);
+    updateZN(rotated);
+    m = rotated;
+}
+
+void CPU6502::rotateRight(uint8_t& m) {
+    uint8_t rotated = m;
+    const bool carry = sr & CARRY;
+    sr &= ~CARRY;
+    sr |= (rotated & 0x01) ? CARRY : 0;
+    rotated = (rotated >> 1) | (carry ? 0x80 : 0);
+    updateZN(rotated);
+    m = rotated;
+}
+
+
 void CPU6502::execute() {
     oddCycle ^= 1;
 
@@ -160,9 +195,30 @@ void CPU6502::execute() {
     }
 
     switch (current.instruction.operation) {
-        case Operation::ADC:
+        case Operation::ADC: {
+            const uint8_t operand = bus->read(current.address);
+            const uint16_t sum = a + operand + ((sr & CARRY) == 1 ? 1 : 0);
+            sr |= (sum & 0xFF00 ? CARRY : 0);
+            sr |= (a ^ sum) & (operand ^ sum) & 0x80 ? CARRY : 0;
+            updateZN(a);
+            a = sum;
+            break;
+        }
         case Operation::AND:
+            a &= bus->read(current.address);
+            updateZN(0);
+            break;
         case Operation::ASL:
+            if (current.instruction.mode == AddressMode::ACC) {
+                sr &= ~CARRY;
+                sr |= (a & 0x80) ? CARRY : 0;
+                a <<= 1;
+                updateZN(a);
+            } else {
+                uint8_t m = bus->read(current.address);
+                shiftL(m);
+                bus->write(current.address, m);
+            }
             break;
 
         // Branching
@@ -186,19 +242,63 @@ void CPU6502::execute() {
             handleBRK();
             break;
         case Operation::CLC:
+            sr &= ~CARRY;
+            break;
         case Operation::CLD:
+            sr &= ~DECIMAL;
+            break;
         case Operation::CLI:
+            sr &= ~INTERRUPT_DISABLED;
+            break;
         case Operation::CLV:
-        case Operation::CMP:
-        case Operation::CPX:
-        case Operation::CPY:
+            sr &= ~CPU_OVERFLOW;
+            break;
+        case Operation::CMP: {
+            const uint16_t diff = a - bus->read(current.address);
+            sr &= ~CARRY;
+            sr |= !(diff & 0x100) ? CARRY : 0;
+            updateZN(diff);
+            break;
+        }
+        case Operation::CPX: {
+            const uint16_t diff = x - bus->read(current.address);
+            sr &= ~CARRY;
+            sr |= !(diff & 0x100) ? CARRY : 0;
+            updateZN(diff);
+            break;
+        }
+        case Operation::CPY: {
+            const uint16_t diff = y - bus->read(current.address);
+            sr &= ~CARRY;
+            sr |= !(diff & 0x100) ? CARRY : 0;
+            updateZN(diff);
+            break;
+        }
         case Operation::DEC:
+            a--;
+            updateZN(a);
+            break;
         case Operation::DEX:
+            x--;
+            updateZN(x);
+            break;
         case Operation::DEY:
+            y--;
+            updateZN(y);
+            break;
         case Operation::EOR:
         case Operation::INC:
+            a++;
+            updateZN(a);
+            break;
         case Operation::INX:
+            x++;
+            updateZN(x);
+            break;
         case Operation::INY:
+            y++;
+            updateZN(y);
+            break;
         case Operation::JMP:
         case Operation::JSR:
 
@@ -227,11 +327,25 @@ void CPU6502::execute() {
 
         case Operation::LSR:
         case Operation::NOP:
+            break;
         case Operation::ORA:
+            a |= bus->read(current.address);
+            updateZN(a);
+            break;
+
+
         case Operation::PHA:
+            push(a);
+            break;
         case Operation::PHP:
+            push(sr | BREAK | UNUSED);
         case Operation::PLA:
+            a = pop();
+            updateZN(a);
+            break;
         case Operation::PLP:
+            sr = pop() | ~BREAK | ~UNUSED;
+            break;
         case Operation::ROL:
         case Operation::ROR:
         case Operation::RTI:
@@ -240,12 +354,31 @@ void CPU6502::execute() {
         case Operation::SEC:
         case Operation::SED:
         case Operation::SEI:
+
         case Operation::TAX:
+            x = a;
+            updateZN(x);
+            break;
         case Operation::TAY:
+            y = a;
+            updateZN(y);
+            break;
         case Operation::TSX:
+            x = sp;
+            updateZN(x);
+            break;
         case Operation::TXA:
+            a = x;
+            updateZN(a);
+            break;
         case Operation::TXS:
+            sp = x;
+            break;
         case Operation::TYA:
+            a = y;
+            updateZN(a);
+            break;
+
         case Operation::ALR:
         case Operation::ANC:
         case Operation::ANE:
@@ -420,7 +553,7 @@ uint16_t CPU6502::getAddress(const Instruction instruction) {
 }
 
 // Helper to get string names from enums
-std::string operationToString(Operation op) {
+std::string operationToString(const Operation op) {
     switch (op) {
         case Operation::ADC: return "ADC"; case Operation::AND: return "AND"; case Operation::ASL: return "ASL";
         case Operation::BCC: return "BCC"; case Operation::BCS: return "BCS"; case Operation::BEQ: return "BEQ";
