@@ -4,9 +4,6 @@
 
 #include "PPU.h"
 
-#include <assert.h>
-#include <iostream>
-
 #include "InterruptLine.h"
 
 uint8_t PPU::readStatus() {
@@ -59,5 +56,9 @@ bool PPU::execute() {
     }
 
     return frameComplete;
+}
+
+std::array<uint32_t, 256 * 240> PPU::getFrameBuffer() const {
+    return frameBuffer;
 }
 

@@ -5,7 +5,6 @@
 #include "Window.h"
 
 #include <stdexcept>
-#include <GLFW/glfw3.h>
 
 Window::Window() {
     if (!glfwInit()) {
@@ -13,6 +12,10 @@ Window::Window() {
     }
 
     glfwDefaultWindowHints();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
     window = glfwCreateWindow(800, 600, "Hello World", nullptr, nullptr);
 
@@ -23,8 +26,28 @@ Window::Window() {
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
     glfwShowWindow(window);
+    if (!gladLoadGL(glfwGetProcAddress)) {
+        throw std::runtime_error("Failed to initialize OpenGL context");
+    }
 }
+
+Window::~Window() {
+    if (window) {
+        glfwDestroyWindow(window);
+    }
+    glfwTerminate();
+}
+
 
 bool Window::shouldClose() const {
     return glfwWindowShouldClose(window);
 }
+
+void Window::swapBuffers() const {
+    glfwSwapBuffers(window);
+}
+
+void Window::pollEvents() {
+    glfwPollEvents();
+}
+

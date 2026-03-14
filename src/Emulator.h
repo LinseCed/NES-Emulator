@@ -15,6 +15,8 @@
 class Emulator {
 public:
     Emulator();
+    void runFrame();
+    std::array<uint32_t, 256 * 240> getFrameBuffer() const;
 private:
     InterruptLine nmiIRQ;
     InterruptLine IRQ;
