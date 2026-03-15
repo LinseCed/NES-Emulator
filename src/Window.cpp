@@ -17,7 +17,7 @@ Window::Window() {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-    window = glfwCreateWindow(800, 600, "Hello World", nullptr, nullptr);
+    window = glfwCreateWindow(256*4, 240*4, "Hello World", nullptr, nullptr);
 
     if (!window) {
         throw std::runtime_error("Failed to create GLFW window");
@@ -29,6 +29,9 @@ Window::Window() {
     if (!gladLoadGL(glfwGetProcAddress)) {
         throw std::runtime_error("Failed to initialize OpenGL context");
     }
+    int fbWidth, fbHeight;
+    glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
+    glViewport(0, 0, fbWidth, fbHeight);
 }
 
 Window::~Window() {

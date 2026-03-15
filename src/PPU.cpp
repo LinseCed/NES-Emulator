@@ -58,7 +58,7 @@ bool PPU::execute() {
     return frameComplete;
 }
 
-std::array<uint32_t, 256 * 240> PPU::getFrameBuffer() const {
+std::array<uint32_t, 256 * 240>* PPU::getFrameBuffer() const {
     return frameBuffer;
 }
 

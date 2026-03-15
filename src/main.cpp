@@ -4,12 +4,12 @@
 
 int main() {
     Emulator emulator;
-    const Window window;
+    Window window;
     Renderer renderer;
     while (!window.shouldClose()) {
         emulator.runFrame();
 
-        renderer.render(emulator.getFrameBuffer());
+        renderer.render(*emulator.getFrameBuffer());
 
         window.swapBuffers();
         Window::pollEvents();

@@ -43,7 +43,7 @@ void Emulator::runFrame() {
         }
 }
 
-std::array<uint32_t, 256 * 240> Emulator::getFrameBuffer() const {
+std::array<uint32_t, 256 * 240>* Emulator::getFrameBuffer() const {
     return ppu.getFrameBuffer();
 }
 

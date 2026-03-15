@@ -574,7 +574,6 @@ std::string operationToString(const Operation op) {
         case Operation::STX: return "STX"; case Operation::STY: return "STY"; case Operation::TAX: return "TAX";
         case Operation::TAY: return "TAY"; case Operation::TSX: return "TSX"; case Operation::TXA: return "TXA";
         case Operation::TXS: return "TXS"; case Operation::TYA: return "TYA";
-        // For unofficial instructions just print name as hex
         default: return "UNK";
     }
 }
@@ -590,11 +589,9 @@ std::string addressModeToString(AddressMode mode) {
     }
 }
 
-// The print function
 void printCPUState(uint16_t pc, uint8_t a, uint8_t x, uint8_t y, uint8_t sp, uint8_t sr, InstructionState instrState) {
-    // Move cursor to top-left of console (or wherever your block starts)
-    std::cout << "\033[3F"; // Move cursor up 3 lines
-    std::cout << "\033[J";  // Clear from cursor down
+    std::cout << "\033[3F";
+    std::cout << "\033[J";
 
     std::cout << "CPU STATE\n";
     std::cout << "PC: $" << std::hex << std::setw(4) << std::setfill('0') << pc
