@@ -426,6 +426,8 @@ private:
     [[nodiscard]] uint16_t readAddress(uint16_t) const;
     uint8_t pop();
     void push(uint8_t value);
+    uint16_t popAddress();
+    void pushAddress(uint16_t value);
     void pollInterrupts();
     void branch(uint8_t mask, uint8_t predicate);
     void reset();

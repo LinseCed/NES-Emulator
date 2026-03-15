@@ -30,7 +30,6 @@ void PPU::writeOAMAddr(const uint8_t a) {
 }
 
 
-
 bool PPU::execute() {
     bool frameComplete = false;
     cycle++;
@@ -58,7 +57,7 @@ bool PPU::execute() {
     return frameComplete;
 }
 
-std::array<uint32_t, 256 * 240>* PPU::getFrameBuffer() const {
-    return frameBuffer;
+const std::array<uint32_t, 256 * 240>* PPU::getFrameBuffer() const {
+    return &frameBuffer;
 }
 

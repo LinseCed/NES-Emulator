@@ -22,7 +22,7 @@ public:
     void writeCtrl(uint8_t c);
     void writeMask(uint8_t m);
     void writeOAMAddr(uint8_t a);
-    [[nodiscard]] std::array<uint32_t, 256 * 240>* getFrameBuffer() const;
+    [[nodiscard]] const std::array<uint32_t, 256 * 240>* getFrameBuffer() const;
 private:
     bool firstWrite = true;
     uint8_t vram[0x4000] = {};
@@ -35,7 +35,7 @@ private:
     Bus* bus = nullptr;
     InterruptLine& nmiIRQ;
     uint16_t oamAddr = 0;
-    std::array<uint32_t, 256 * 240>* frameBuffer{};
+    std::array<uint32_t, 256 * 240> frameBuffer{};
 };
 
 

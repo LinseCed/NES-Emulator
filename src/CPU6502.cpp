@@ -43,11 +43,22 @@ void CPU6502::pollInterrupts() {
 
 
 uint8_t CPU6502::pop() {
-    return bus->read(STACK_START + sp++);
+    return bus->read(STACK_START + ++sp);
 }
 
-void CPU6502::push(uint8_t value) {
+void CPU6502::push(const uint8_t value) {
     bus->write(STACK_START + sp--, value);
+}
+
+uint16_t CPU6502::popAddress() {
+    const uint8_t low = bus->read(STACK_START + ++sp);
+    const uint8_t high = bus->read(STACK_START + ++sp);
+    return (high << 8) | low;
+}
+
+void CPU6502::pushAddress(const uint16_t value) {
+    bus->write(STACK_START + sp--, (value >> 8) & 0xFF);
+    bus->write(STACK_START + sp--, value & 0xFF);
 }
 
 uint16_t CPU6502::readAddress(const uint16_t addr) const {
@@ -171,7 +182,6 @@ void CPU6502::rotateRight(uint8_t& m) {
 
 void CPU6502::execute() {
     oddCycle ^= 1;
-
     pollInterrupts();
 
     if (current.cycle == 0) {
@@ -189,6 +199,7 @@ void CPU6502::execute() {
         current.cycle = current.instruction.cycles;
         prepareBranch();
     }
+    printCPUState(pc, a, x, y, sp, sr, current);
 
     if (--current.cycle > 0) {
         return;
@@ -236,19 +247,24 @@ void CPU6502::execute() {
             }
             break;
 
-        case Operation::BIT:
+        case Operation::BIT: {
+            const uint8_t operand = bus->read(current.address);
+            sr &= ~(NEGATIVE | ZERO | CPU_OVERFLOW);
+            sr |= !(operand & a) ? ZERO : 0;
+            sr |= operand & (NEGATIVE | CPU_OVERFLOW);
             break;
+        }
         case Operation::BRK:
             handleBRK();
             break;
         case Operation::CLC:
-            sr &= ~CARRY;
+            setFlag(CARRY, false);
             break;
         case Operation::CLD:
-            sr &= ~DECIMAL;
+            setFlag(DECIMAL, false);
             break;
         case Operation::CLI:
-            sr &= ~INTERRUPT_DISABLED;
+            setFlag(INTERRUPT_DISABLED, false);
             break;
         case Operation::CLV:
             sr &= ~CPU_OVERFLOW;
@@ -287,6 +303,9 @@ void CPU6502::execute() {
             updateZN(y);
             break;
         case Operation::EOR:
+            a ^= bus->read(current.address);
+            updateZN(a);
+            break;
         case Operation::INC:
             a++;
             updateZN(a);
@@ -300,8 +319,13 @@ void CPU6502::execute() {
             updateZN(y);
             break;
         case Operation::JMP:
-        case Operation::JSR:
-
+            pc = current.address;
+            break;
+        case Operation::JSR: {
+            push(pc - 1);
+            pc = current.address;
+            break;
+        }
         // Register Load And Store
         case Operation::LDA:
             a = bus->read(current.address);
@@ -326,6 +350,7 @@ void CPU6502::execute() {
             break;
 
         case Operation::LSR:
+            break;
         case Operation::NOP:
             break;
         case Operation::ORA:
@@ -346,15 +371,48 @@ void CPU6502::execute() {
         case Operation::PLP:
             sr = pop() | ~BREAK | ~UNUSED;
             break;
-        case Operation::ROL:
-        case Operation::ROR:
-        case Operation::RTI:
-        case Operation::RTS:
+        case Operation::ROL: {
+            if (current.instruction.mode == AddressMode::ACC) {
+                rotateLeft(a);
+            } else {
+                uint8_t value = bus->read(current.address);
+                rotateLeft(value);
+                bus->write(current.address, value);
+            }
+            break;
+        }
+        case Operation::ROR: {
+            if (current.instruction.mode == AddressMode::ACC) {
+                rotateRight(a);
+            } else {
+                uint8_t value = bus->read(current.address);
+                rotateRight(value);
+                bus->write(current.address, value);
+            }
+            break;
+        }
+        case Operation::RTI: {
+            sr &= (BREAK | UNUSED);
+            sr |= pop() & ~(BREAK | UNUSED);
+            const uint8_t low = pop();
+            const uint8_t high = pop();
+            pc = high << 8 | low;
+            break;
+        }
+        case Operation::RTS: {
+            pc = popAddress() + 1;
+            break;
+        }
         case Operation::SBC:
         case Operation::SEC:
+            setFlag(CARRY, true);
+            break;
         case Operation::SED:
+            setFlag(DECIMAL, true);
+            break;
         case Operation::SEI:
-
+            setFlag(INTERRUPT_DISABLED, true);
+            break;
         case Operation::TAX:
             x = a;
             updateZN(x);
@@ -409,7 +467,6 @@ void CPU6502::execute() {
         default:
             throw std::runtime_error("Unknown opcode");
     }
-    printCPUState(pc, a, x, y, sp, sr, current);
 }
 
 uint16_t CPU6502::getAddress(const Instruction instruction) {

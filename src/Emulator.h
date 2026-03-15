@@ -16,7 +16,7 @@ class Emulator {
 public:
     Emulator();
     void runFrame();
-    [[nodiscard]] std::array<uint32_t, 256 * 240>* getFrameBuffer() const;
+    [[nodiscard]] const std::array<uint32_t, 256 * 240>* getFrameBuffer() const;
 private:
     InterruptLine nmiIRQ;
     InterruptLine IRQ;
@@ -25,6 +25,7 @@ private:
     RAM ram;
     CPU6502 cpu;
     Bus bus;
+    Cartridge cartridge;
 };
 
 

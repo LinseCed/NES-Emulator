@@ -34,7 +34,6 @@ Cartridge::Cartridge(const std::string& gamePath) {
     if (chr_size > 0) {
         chrROM.assign(data.begin() + offset, data.begin() + offset + chr_size);
     }
-
     file.close();
 }
 

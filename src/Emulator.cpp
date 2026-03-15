@@ -8,12 +8,11 @@
 
 #include "Cartridge.h"
 
-Emulator::Emulator() : ppu(nmiIRQ), bus(ppu, ram, cpu) {
+Emulator::Emulator() : ppu(nmiIRQ), bus(ppu, ram, cpu), cartridge("SMB.nes") {
     ppu.connectBus(bus);
     cpu.connectBus(bus);
     cpu.connectNMIInterruptLine(nmiIRQ);
     cpu.connectIRQ(IRQ);
-    Cartridge cartridge("SMB.nes");
     bus.connectCartridge(cartridge);
 }
 
@@ -25,7 +24,6 @@ void Emulator::runFrame() {
 
     int cyclesThisFrame = 0;
     constexpr int cyclesPerFrame = CYCLES_PER_SECOND / FRAMES_PER_SECOND;
-
     while (cyclesThisFrame < cyclesPerFrame) {
         cpu.execute();
 
@@ -43,7 +41,7 @@ void Emulator::runFrame() {
         }
 }
 
-std::array<uint32_t, 256 * 240>* Emulator::getFrameBuffer() const {
+const std::array<uint32_t, 256 * 240>* Emulator::getFrameBuffer() const {
     return ppu.getFrameBuffer();
 }
 

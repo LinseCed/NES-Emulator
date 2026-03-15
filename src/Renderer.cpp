@@ -85,7 +85,7 @@ void Renderer::render(const std::array<uint32_t, 256 * 240>& frameBuffer) {
     glClear(GL_COLOR_BUFFER_BIT);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 256, 240, GL_BGRA, GL_UNSIGNED_BYTE, testFramebuffer.data());
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 256, 240, GL_BGRA, GL_UNSIGNED_BYTE, frameBuffer.data());
 
     glUseProgram(program);
     glBindVertexArray(VAO);
