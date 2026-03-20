@@ -10,16 +10,20 @@
 #include "RAM.h"
 
 
-uint8_t Bus::read(const uint16_t addr) const {
+uint8_t Bus::read(uint16_t addr) const {
     if (addr <= 0x1fff) {
         return ram.read(addr & 0x07ff);
     }
     if (addr >= 0x2000 && addr <= 0x3fff) {
+        addr = 0x2000 + (addr % 8);
         if (addr == 0x2002) {
             return ppu.readStatus();
         }
         if (addr == 0x2004) {
-
+            return ppu.readOAMData();
+        }
+        if (addr == 0x2007) {
+            return ppu.readPPU();
         }
     }
 
@@ -41,12 +45,13 @@ uint8_t Bus::read(const uint16_t addr) const {
     return 0;
 }
 
-void::Bus::write(const uint16_t addr, const uint8_t data) const {
+void::Bus::write(uint16_t addr, const uint8_t data) const {
     if (addr <= 0x1FFF) {
         ram.write(addr & 0x07ff, data);
     } else if (addr <= 0x3fff) {
 
-    } else if (addr >= 0x2000 && addr <= 0x2007) {
+    } else if (addr >= 0x2000 && addr <= 0x3fff) {
+        addr = 0x2000 + (addr % 8);
         if (addr == 0x2000) {
             ppu.writeCtrl(data);
         }
@@ -54,19 +59,19 @@ void::Bus::write(const uint16_t addr, const uint8_t data) const {
             ppu.writeMask(data);
         }
         if (addr == 0x2003) {
-
+            ppu.writeOAMAddr(data);
         }
         if (addr == 0x2004) {
-
+            ppu.writeOAMData(data);
         }
         if (addr == 0x2005) {
-
+            ppu.writeScroll(data);
         }
         if (addr == 0x2006) {
-
+            ppu.writeAddr(data);
         }
         if (addr == 0x2007) {
-
+            ppu.writePPU(data);
         }
     } else if (addr <= 0x4020) {
         if (addr == 0x4014) {

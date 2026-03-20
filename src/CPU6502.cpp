@@ -114,7 +114,7 @@ bool CPU6502::pageCrossed(const uint16_t base, const uint16_t addr) {
     return (base & 0xFF00) != (addr & 0xFF00);
 }
 
-void CPU6502::handleInterrupt(uint16_t vector, bool setBreakFlag) {
+void CPU6502::handleInterrupt(const uint16_t vector, const bool setBreakFlag) {
     push(pc >> 8 & 0xFF);
     push(pc & 0xFF);
 
@@ -209,8 +209,8 @@ void CPU6502::execute() {
         case Operation::ADC: {
             const uint8_t operand = bus->read(current.address);
             const uint16_t sum = a + operand + ((sr & CARRY) == 1 ? 1 : 0);
-            sr |= (sum & 0xFF00 ? CARRY : 0);
-            sr |= (a ^ sum) & (operand ^ sum) & 0x80 ? CARRY : 0;
+            setFlag(CARRY, sum > 0xFF);
+            setFlag(CPU_OVERFLOW, (a ^ sum) & (operand ^ sum) & 0x80);
             updateZN(a);
             a = sum;
             break;
@@ -290,10 +290,13 @@ void CPU6502::execute() {
             updateZN(diff);
             break;
         }
-        case Operation::DEC:
-            a--;
-            updateZN(a);
+        case Operation::DEC: {
+            uint8_t value = bus->read(current.address);
+            value--;
+            bus->write(current.address, value);
+            updateZN(value);
             break;
+        }
         case Operation::DEX:
             x--;
             updateZN(x);
@@ -306,10 +309,13 @@ void CPU6502::execute() {
             a ^= bus->read(current.address);
             updateZN(a);
             break;
-        case Operation::INC:
-            a++;
-            updateZN(a);
+        case Operation::INC: {
+            uint8_t value = bus->read(current.address);
+            value++;
+            bus->write(current.address, value);
+            updateZN(value);
             break;
+        }
         case Operation::INX:
             x++;
             updateZN(x);
@@ -348,8 +354,18 @@ void CPU6502::execute() {
         case Operation::STY:
             bus->write(current.address, y);
             break;
-
         case Operation::LSR:
+            if (current.instruction.mode == AddressMode::ACC) {
+                setFlag(CARRY, a & 1);
+                a >>= 1;
+                updateZN(a);
+            } else {
+                uint8_t v = bus->read(current.address);
+                setFlag(CARRY, v & 1);
+                v >>= 1;
+                bus->write(current.address, v);
+                updateZN(v);
+            }
             break;
         case Operation::NOP:
             break;
@@ -364,12 +380,15 @@ void CPU6502::execute() {
             break;
         case Operation::PHP:
             push(sr | BREAK | UNUSED);
+            break;
         case Operation::PLA:
             a = pop();
             updateZN(a);
             break;
         case Operation::PLP:
-            sr = pop() | ~BREAK | ~UNUSED;
+            sr = pop();
+            sr &= ~BREAK;
+            sr |= UNUSED;
             break;
         case Operation::ROL: {
             if (current.instruction.mode == AddressMode::ACC) {
@@ -403,7 +422,16 @@ void CPU6502::execute() {
             pc = popAddress() + 1;
             break;
         }
-        case Operation::SBC:
+        case Operation::SBC: {
+            uint8_t operand = bus->read(current.address);
+            const uint8_t value = operand ^ 0xff;
+            const uint16_t sum = a + value + (sr & CARRY ? 1 : 0);
+            setFlag(CARRY, sum & 0x100);
+            setFlag(CPU_OVERFLOW, (sum ^ a) & (sum ^ value) & 0x80);
+            a = sum & 0xFF;
+            updateZN(a);
+            break;
+        }
         case Operation::SEC:
             setFlag(CARRY, true);
             break;

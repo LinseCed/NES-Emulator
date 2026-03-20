@@ -18,12 +18,12 @@ Emulator::Emulator() : ppu(nmiIRQ), bus(ppu, ram, cpu), cartridge("SMB.nes") {
 
 void Emulator::runFrame() {
     using clock = std::chrono::high_resolution_clock;
-    constexpr auto frameTime = std::chrono::milliseconds(16);
+    constexpr auto frameTime = std::chrono::milliseconds(500);
 
     const auto frameStart = clock::now();
 
     int cyclesThisFrame = 0;
-    constexpr int cyclesPerFrame = CYCLES_PER_SECOND / FRAMES_PER_SECOND;
+    constexpr int cyclesPerFrame = (CYCLES_PER_SECOND / FRAMES_PER_SECOND);
     while (cyclesThisFrame < cyclesPerFrame) {
         cpu.execute();
 
